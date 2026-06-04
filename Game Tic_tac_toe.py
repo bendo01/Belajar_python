@@ -135,7 +135,7 @@ winner_line = None
 
 mode = "MENU"  # MENU / GAME
 ai_mode = False
-ai_level = "EASY"
+ai_level = "MUDAH"
 # SOUND (beep sederhana)
 def beep():
     print("🔊 Beep")
@@ -149,9 +149,9 @@ def draw_menu():
 
 def draw_LEVEL_menu():
     screen.fill(WHITE)
-    text1 = FONT.render("EASY", True, BLACK)
-    text2 = FONT.render("MEDIUM", True, BLACK)
-    text3 = FONT.render("HARD", True, BLACK)
+    text1 = FONT.render("MUDAH", True, BLACK)
+    text2 = FONT.render("SEDANG", True, BLACK)
+    text3 = FONT.render("SULIT", True, BLACK)
     screen.blit(text1, (130,120))
     screen.blit(text2, (130,200))
     screen.blit(text3, (130,280))
