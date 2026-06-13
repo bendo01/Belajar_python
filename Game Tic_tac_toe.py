@@ -23,129 +23,43 @@ winner_line = None
 
 mode = "MENU"  # MENU / GAME
 ai_mode = False
-
-# SOUND (beep sederhana)
-def beep():
-    print("🔊 Beep")
-
-def draw_menu():
-    screen.fill(WHITE)
-    text1 = FONT.render("Klik: 1 = 2 Player", True, BLACK)
-    text2 = FONT.render("Klik: 2 = Lawan AI", True, BLACK)
-    screen.blit(text1, (50,150))
-    screen.blit(text2, (50,220))
-
-def draw_board():
-    screen.fill(WHITE)
-
-    # garis
-    for i in range(1,3):
-        pygame.draw.line(screen, BLACK, (0,i*133),(400,i*133),4)
-        pygame.draw.line(screen, BLACK, (i*133,0),(i*133,400),4)
-
-    # X O
-    for r in range(3):
-        for c in range(3):
-            if board[r][c] == "X":
-                pygame.draw.line(screen, RED,
-                                 (c*133+20,r*133+20),
-                                 (c*133+110,r*133+110),6)
-                pygame.draw.line(screen, RED,
-                                 (c*133+110,r*133+20),
-                                 (c*133+20,r*133+110),6)
-            elif board[r][c] == "O":
-                pygame.draw.circle(screen, BLUE,
-                                   (c*133+66,r*133+66),40,6)
-
-    # garis menang
-    if winner_line:
-        pygame.draw.line(screen, GREEN,
-                         winner_line[0],
-                         winner_line[1],8)
-
-def check_win():
-    global winner_line
-
-    for i in range(3):
-        if board[i][0]==board[i][1]==board[i][2]!="":
-            winner_line = ((0,i*133+66),(400,i*133+66))
-            return True
-        if board[0][i]==board[1][i]==board[2][i]!="":
-            winner_line = ((i*133+66,0),(i*133+66,400))
-            return True
-
-    if board[0][0]==board[1][1]==board[2][2]!="":
-        winner_line = ((0,0),(400,400))
-        return True
-
-    if board[0][2]==board[1][1]==board[2][0]!="":
-        winner_line = ((400,0),(0,400))
-        return True
-
-    return False
-def ai_move():
-    # 30% AI main random (bisa salah)
-    if random.random() < 0.95:
-        empty = [(r,c) for r in range(3) for c in range(3) if board[r][c] == ""]
-        if empty:
-            r,c = random.choice(empty)
-            board[r][c] = "-1"
-            return
-
-    # 70% tetap pakai minimax (pintar)
-    best_score = -100
-    best_move = None
-
-    for r in range(3):
-        for c in range(3):
-            if board[r][c] == "":
-                board[r][c] = "O"
-                score = minimax(False)
-                board[r][c] = ""
-
-                if score > best_score:
-                    best_score = score
-                    best_move = (r, c)
-
-    if best_move:
-        board[best_move[0]][best_move[1]] = "O"
-
-import pygame
-import sys
-import random
-
-pygame.init()
-
-WIDTH, HEIGHT = 400, 500
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Tic Tac Toe PRO")
-
-FONT = pygame.font.SysFont(None, 40)
-
-WHITE = (255,255,255)
-BLACK = (0,0,0)
-RED = (255,0,0)
-BLUE = (0,100,255)
-GREEN = (0,200,0)
-
-board = [["" for _ in range(3)] for _ in range(3)]
-player = "X"
-game_over = False
-winner_line = None
-
-mode = "MENU"  # MENU / GAME
-ai_mode = False
 ai_level = "MUDAH"
 # SOUND (beep sederhana)
 def beep():
     print("🔊 Beep")
 
 def draw_menu():
+
     screen.fill(WHITE)
-    text1 = FONT.render("Klik: 1 = 2 Player", True, BLACK)
-    text2 = FONT.render("Klik: 2 = Lawan AI", True, BLACK)
-    screen.blit(text1, (50,150))
-    screen.blit(text2, (50,220))
+
+    mouse = pygame.mouse.get_pos()
+
+    title = FONT.render("TIC TAC TOE PRO", True, BLACK)
+    screen.blit(title, (70,60))
+
+    global btn_player
+    global btn_ai
+    global btn_exit
+
+    btn_player = pygame.Rect(100,150,200,50)
+    btn_ai = pygame.Rect(100,230,200,50)
+    btn_exit = pygame.Rect(100,310,200,50)
+
+    color1 = BLUE if btn_player.collidepoint(mouse) else BLACK
+    color2 = BLUE if btn_ai.collidepoint(mouse) else BLACK
+    color3 = RED if btn_exit.collidepoint(mouse) else BLACK
+
+    pygame.draw.rect(screen,color1,btn_player,3)
+    pygame.draw.rect(screen,color2,btn_ai,3)
+    pygame.draw.rect(screen,color3,btn_exit,3)
+
+    txt1 = FONT.render("2 PLAYER",True,color1)
+    txt2 = FONT.render("LAWAN AI",True,color2)
+    txt3 = FONT.render("KELUAR",True,color3)
+
+    screen.blit(txt1,(125,160))
+    screen.blit(txt2,(130,240))
+    screen.blit(txt3,(145,320))
 
 def draw_LEVEL_menu():
     screen.fill(WHITE)
@@ -213,18 +127,61 @@ def check_win():
 
     return False
 
-def ai_move():
+def ai_easy():
     empty = []
+
     for r in range(3):
         for c in range(3):
-
             if board[r][c] == "":
                 empty.append((r,c))
 
     if empty:
         r,c = random.choice(empty)
-        print("AI PILIH:", r, c)
         board[r][c] = "O"
+
+
+def ai_hard():
+
+    best_score = -100
+    move = None
+
+    for r in range(3):
+        for c in range(3):
+
+            if board[r][c] == "":
+
+                board[r][c] = "O"
+
+                score = minimax(False)
+
+                board[r][c] = ""
+
+                if score > best_score:
+                    best_score = score
+                    move = (r,c)
+
+    if move:
+        board[move[0]][move[1]] = "O"
+
+
+def ai_medium():
+
+    if random.random() < 0.5:
+        ai_easy()
+    else:
+        ai_hard()
+
+
+def ai_move():
+
+    if ai_level == "EASY":
+        ai_easy()
+
+    elif ai_level == "MEDIUM":
+        ai_medium()
+
+    elif ai_level == "HARD":
+        ai_hard()
 
 def is_full():
     return all(board[r][c] != "" for r in range(3) for c in range(3))
@@ -292,14 +249,20 @@ while True:
             sys.exit()
 
         if mode == "MENU":
+
             if event.type == pygame.MOUSEBUTTONDOWN:
-                x,y = event.pos
-                if 100 < y < 200:
+
+                if btn_player.collidepoint(event.pos):
                     mode = "GAME"
                     ai_mode = False
-                elif 200 < y < 300:
+
+                elif btn_ai.collidepoint(event.pos):
                     mode = "LEVEL"
                     ai_mode = True
+
+                elif btn_exit.collidepoint(event.pos):
+                    pygame.quit()
+                    sys.exit()
 
         elif mode == "LEVEL":
             if event.type == pygame.MOUSEBUTTONDOWN:
