@@ -82,30 +82,38 @@ def draw_board():
     for r in range(3):
         for c in range(3):
             if board[r][c] == "X":
-                pygame.draw.line(screen, RED,
-                                 (c*133+20,r*133+20),
-                                 (c*133+110,r*133+110),6)
-                pygame.draw.line(screen, RED,
-                                 (c*133+110,r*133+20),
-                                 (c*133+20,r*133+110),6)
+                pygame.draw.line(screen, RED, (c*133+20,r*133+20), (c*133+110,r*133+110),6)
+                pygame.draw.line(screen, RED, (c*133+110,r*133+20), (c*133+20,r*133+110),6)
             elif board[r][c] == "O":
-                pygame.draw.circle(screen, BLUE,
-                                   (c*133+66,r*133+66),40,6)
+                pygame.draw.circle(screen, BLUE, (c*133+66,r*133+66),40,6)
 
     # garis menang
     if winner_line:
-        pygame.draw.line(screen, GREEN,
-                         winner_line[0],
-                         winner_line[1],8)
+        pygame.draw.line(screen, GREEN, winner_line[0], winner_line[1],8)
+    
+    # ------------------ AWAL KODE BARU YANG DITAMBAHKAN ------------------
+    global btn_back
+    mouse = pygame.mouse.get_pos()
+    
+    # Membuat area kotak tombol (x=240, y=430, lebar=140, tinggi=45)
+    btn_back = pygame.Rect(240, 430, 140, 45)
+    
+    # Efek Hover: warna merah jika dilewati mouse, hitam jika tidak
+    color_back = RED if btn_back.collidepoint(mouse) else BLACK
+    pygame.draw.rect(screen, color_back, btn_back, 2)
+    
+    # Cetak tulisan "KEMBALI" di dalam kotak tombol
+    txt_back = pygame.font.SysFont(None, 30).render("KEMBALI", True, color_back)
+    screen.blit(txt_back, (265, 442))
+
+    # Teks info status game di sebelah kiri bawah layar
+    status_str = f"LVL: {ai_level}" if ai_mode else "2 PLAYER"
+    if game_over:
+        status_str = "SERI!" if not winner_line else "SELESAI!"
         
-level_text = FONT.render(
-    f"LEVEL : {ai_level}",
-    True,
-    BLACK
-)
-
-screen.blit(level_text, (10,430))
-
+    level_text = FONT.render(status_str, True, BLACK)
+    screen.blit(level_text, (10, 440))
+    # ------------------ AKHIR KODE BARU YANG DITAMBAHKAN ------------------
 def check_win():
     global winner_line
 
@@ -151,7 +159,6 @@ def ai_hard():
             if board[r][c] == "":
 
                 board[r][c] = "O"
-
                 score = minimax(False)
 
                 board[r][c] = ""
@@ -278,9 +285,17 @@ while True:
                     mode = "GAME"
 
         elif mode == "GAME":
-            if event.type == pygame.MOUSEBUTTONDOWN and not game_over:
-                x,y = event.pos
-                if y < 400:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # 1. CEK DULU: Apakah yang diklik adalah tombol kembali?
+                if btn_back.collidepoint(event.pos):
+                    beep()
+                    reset()       # Bersihkan papan sebelum kembali
+                    mode = "MENU" # Pindah ke Menu Utama
+                
+                # 2. JIKA BUKAN tombol kembali, jalankan logika papan game seperti biasa
+                # (Hanya berjalan jika game belum selesai DAN klik berada di area papan y < 400)
+                elif not game_over and event.pos[1] < 400:
+                    x, y = event.pos
                     r = y // 133
                     c = x // 133
 
@@ -292,10 +307,10 @@ while True:
                             print("MENANG:", player)
                             game_over = True
                         else:
-                            player = "O" if player=="X" else "X"
+                            player = "O" if player == "X" else "X"
 
                         # AI jalan
-                        if ai_mode and player=="O" and not game_over:
+                        if ai_mode and player == "O" and not game_over:
                             ai_move()
                             beep()
 
@@ -304,7 +319,6 @@ while True:
                                 game_over = True
                             else:
                                 player = "X"
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     reset()
