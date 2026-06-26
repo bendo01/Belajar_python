@@ -15,7 +15,8 @@ BLACK = (0,0,0)
 RED = (255,0,0)
 BLUE = (0,100,255)
 GREEN = (0,200,0)
-
+giliran_text = "Giliran: X"
+giliran_color = BLUE
 board = [["" for _ in range(3)] for _ in range(3)]
 player = "X"
 game_over = False
@@ -308,7 +309,12 @@ while True:
                             game_over = True
                         else:
                             player = "O" if player == "X" else "X"
-
+                            if player == "X"
+                                   giliran_text = "Giliran: X"
+                                   giliran_color = BLUE 
+                        else:
+                                   giliran_text = "Giliran: O"
+                                   giliran_color = RED
                         # AI jalan
                         if ai_mode and player == "O" and not game_over:
                             ai_move()
@@ -328,5 +334,7 @@ while True:
     elif mode == "LEVEL":
         draw_LEVEL_menu()
     else:
-        draw_board()
-    pygame.display.update()
+   draw_board()
+ text_surface = FONT.render(giliran_text, True, giliran_color)
+ screen.blit(text_surface, (20,20))
+ pygame.display.update()
